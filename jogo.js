@@ -12,6 +12,8 @@ Adicionar uma tag 'img' através do JS
   document.body.appendChild(img2);
 
 */
+const som_HIT = new Audio();
+som_HIT.src = './efeitos/hit.wav';
 
 const sprites = new Image();
 sprites.src = './sprites.png';
@@ -124,50 +126,92 @@ const mensagemGetReady = {
   }
 }
 
-// flappy bird
-const flappyBird = {
-  spriteX: 0,
-  spriteY: 0,
-  largura: 33,
-  altura: 24,
-  x: 10,
-  y: 50,
-  velocidade: 0,
-  gravidade: 0.25,
-  atualiza() {
-    flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade;
-    console.log(flappyBird.velocidade); 
-    flappyBird.y = flappyBird.y + flappyBird.velocidade;
-  },
-  desenha: function() {
+function fazColisao(flappyBird, chao) {
+  const flappyBirdY = flappyBird.y + flappyBird.altura;
+  const chaoY = chao.y;
 
-    contexto.drawImage(
-      sprites, // referente a imagem que nós queremos
-      flappyBird.spriteX, flappyBird.spriteY, // sprite x e sprite y (se refere aos pixels da imagem)
-      flappyBird.largura, flappyBird.altura, // tamanho do recorte da sprite
-      flappyBird.x, flappyBird.y, // se refere a posição dessa nossa imagem dentro do canvas
-      flappyBird.largura, flappyBird.altura // qual vai ser o heigth e width da nossa imagem dentro do canvas
-    );
-
+  if(flappyBirdY >= chaoY) {
+    return true;
   }
+  return false;
+}
+
+// flappy bird
+function criarFlappyBird() {
+  const flappyBird = {
+    spriteX: 0,
+    spriteY: 0,
+    largura: 33,
+    altura: 24,
+    x: 10,
+    y: 50,
+    pulo: 4.6,
+
+    pula() {
+      console.log('DEVO PULAR...');
+      console.log('[Antes]' + flappyBird.velocidade);
+      flappyBird.velocidade = -flappyBird.pulo;
+      console.log('[Depois]' + flappyBird.velocidade);
+    },
+
+    velocidade: 0,
+    gravidade: 0.25,
+
+    atualiza() {
+      if(fazColisao(flappyBird, chao)) {
+        console.log("FEZ COLISÃO");
+
+        som_HIT.play();
+        setTimeout(() => {
+          mudarParaTela(Telas.INICIO);
+        }, 500);
+        
+        return;
+      }
+
+      flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade;
+      flappyBird.y = flappyBird.y + flappyBird.velocidade;
+    },
+    desenha: function() {
+
+      contexto.drawImage(
+        sprites, // referente a imagem que nós queremos
+        flappyBird.spriteX, flappyBird.spriteY, // sprite x e sprite y (se refere aos pixels da imagem)
+        flappyBird.largura, flappyBird.altura, // tamanho do recorte da sprite
+        flappyBird.x, flappyBird.y, // se refere a posição dessa nossa imagem dentro do canvas
+        flappyBird.largura, flappyBird.altura // qual vai ser o heigth e width da nossa imagem dentro do canvas
+      );
+
+    }
+  }
+
+  return flappyBird;
 }
 
 //
 // [Telas]
 //
+const globais = {};
 let telaAtiva;
 
 function mudarParaTela(novaTela) {
   telaAtiva = novaTela;
+
+  if(telaAtiva.inicializa) {
+    telaAtiva.inicializa();
+  }
 }
 
 const Telas = {
   INICIO: {
+    inicializa() {
+      globais.flappyBird = criarFlappyBird();
+    },
     desenha() {
       planoDeFundo.desenha();
       chao.desenha();
       mensagemGetReady.desenha();
-      flappyBird.desenha();
+      globais.flappyBird.desenha();
     },
     click() {
       mudarParaTela(Telas.JOGO);
@@ -181,13 +225,13 @@ const Telas = {
     desenha() {
       planoDeFundo.desenha();
       chao.desenha();
-      flappyBird.desenha();
+      globais.flappyBird.desenha();
     },
     click() {
-      mudarParaTela(Telas.INICIO);
+      globais.flappyBird.pula();
     },
     atualiza() {
-      flappyBird.atualiza();
+      globais.flappyBird.atualiza();
     }
   }
 }
