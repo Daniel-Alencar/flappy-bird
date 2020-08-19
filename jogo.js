@@ -1,5 +1,5 @@
 console.log('Flappy Bird');
-
+let frames = 0;
 /*
 Adicionar uma tag 'img' através do JS
 
@@ -116,7 +116,7 @@ function criarChao() {
     // chao3: 0 + (224 * 2),
   
     atualiza() {
-      console.log('É preciso movimentar o chão');
+      // console.log('É preciso movimentar o chão');
       const movimento = 1;
       const repeteEm = chao.largura / 2;
 
@@ -134,9 +134,9 @@ function criarChao() {
       // chao.chao2 -= movimento;
       // chao.chao3 -= movimento;
 
-      console.log('[chao.x]', chao.x);
-      console.log('[repeteEm]', repeteEm);
-      console.log('[Movimentação]', movimentacao % repeteEm);
+      // console.log('[chao.x]', chao.x);
+      // console.log('[repeteEm]', repeteEm);
+      // console.log('[Movimentação]', movimentacao % repeteEm);
 
       chao.x = movimentacao % repeteEm;
     },
@@ -177,10 +177,10 @@ function criarFlappyBird() {
     gravidade: 0.25,
 
     pula() {
-      console.log('DEVO PULAR...');
-      console.log('[Antes do pulo]' + flappyBird.velocidade);
+      // console.log('DEVO PULAR...');
+      // console.log('[Antes do pulo]' + flappyBird.velocidade);
       flappyBird.velocidade = -flappyBird.pulo;
-      console.log('[Depois do pulo]' + flappyBird.velocidade);
+      // console.log('[Depois do pulo]' + flappyBird.velocidade);
     },
     
     atualiza() {
@@ -204,9 +204,42 @@ function criarFlappyBird() {
       { spriteX: 0, spriteY: 26}, // asa no meio
       { spriteX: 0, spriteY: 52}  // asa para baixo
     ],
+    frameAtual: 0,
+    atualizaOFrameAtual() {
+
+      const intervaloDeFrames = 10;
+      const passouOIntervalo = frames % intervaloDeFrames === 0;
+      console.log('[passouOIntervalo]', passouOIntervalo);
+
+      if(passouOIntervalo) {
+        const baseDoIncremento = 1;
+        const incremento = baseDoIncremento + flappyBird.frameAtual;
+        const baseRepeticao = flappyBird.movimentos.length;
+        flappyBird.frameAtual = incremento % baseRepeticao;
+      }
+
+      // console.log('[incremento]', incremento);
+      // console.log('[baseRepeticao]', baseRepeticao);
+      // console.log('[frame]', incremento % baseRepeticao);
+    },
 
     desenha: function() {
-      const { spriteX, spriteY } = flappyBird.movimentos[0];
+      /*
+
+      var index = 0;
+      if(frames % 20 < 10){
+        index = 1;
+      } else if((frames - 10) % 40 < 10) {
+        index = 0;
+      } else if((frames - 30) % 40 < 10) {
+        index = 2;
+      }
+      const { spriteX, spriteY } = flappyBird.movimentos[index];
+      
+      */
+
+      flappyBird.atualizaOFrameAtual();
+      const { spriteX, spriteY } = flappyBird.movimentos[flappyBird.frameAtual];
 
       contexto.drawImage(
         sprites, // referente a imagem que nós queremos
@@ -296,6 +329,7 @@ function mudarParaTela(novaTela) {
 function loopOfAnimation() {
   telaAtiva.atualiza();
   telaAtiva.desenha();
+  frames++;
   requestAnimationFrame(loopOfAnimation);
 }
 
