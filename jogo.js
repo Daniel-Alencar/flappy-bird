@@ -21,6 +21,116 @@ som_HIT.src = './efeitos/hit.wav';
 const canvas = document.querySelector('canvas');
 const contexto = canvas.getContext('2d');
 
+function criarObstaculos() {
+  const obstaculos = {
+    chao: {
+      spriteX: 0,
+      spriteY: 169,
+    },
+    ceu: {
+      spriteX: 0 + 52,
+      spriteY: 169,
+    },
+
+    largura: 52,
+    altura: 400,
+    espacamentoEntreCanos: 100,
+    espacoEntreObstaculos: 175,
+
+    canoChaoY: 300,
+    canoCeuY: 300 - 400 - 100,
+    canos1X: 350,
+    canos2X: 350 + 175,
+    canos3X: 350 + (175 * 2),
+  
+    atualiza() {
+      const movimento = 1;
+
+      obstaculos.canos1X -= movimento;
+      obstaculos.canos2X -= movimento;
+      obstaculos.canos3X -= movimento;
+    },
+  
+    desenha() {
+
+      if(obstaculos.canos1X <= -obstaculos.largura) {
+        console.log('Entrou no 1');
+        obstaculos.canos1X = (obstaculos.espacoEntreObstaculos * 3) + (obstaculos.largura * 2);
+
+      } else if(obstaculos.canos2X <= -obstaculos.largura) {
+        console.log('Entrou no 2');
+        obstaculos.canos2X = (obstaculos.espacoEntreObstaculos * 3) + (obstaculos.largura * 2);
+
+      } else if(obstaculos.canos3X <= -obstaculos.largura) {
+        console.log('Entrou no 3');
+        obstaculos.canos3X = (obstaculos.espacoEntreObstaculos * 3) + (obstaculos.largura * 2);
+
+      }
+
+      // obstáculo 1
+      // cano do chao
+      contexto.drawImage(
+        sprites,
+        obstaculos.chao.spriteX, obstaculos.chao.spriteY,
+        obstaculos.largura, obstaculos.altura,
+        obstaculos.canos1X, obstaculos.canoChaoY,
+        obstaculos.largura, obstaculos.altura
+      );
+
+      // cano do céu
+      contexto.drawImage(
+        sprites,
+        obstaculos.ceu.spriteX, obstaculos.ceu.spriteY,
+        obstaculos.largura, obstaculos.altura,
+        obstaculos.canos1X, obstaculos.canoCeuY,
+        obstaculos.largura, obstaculos.altura
+      );
+
+
+
+      // obstáculo 2
+      // cano do chao
+      contexto.drawImage(
+        sprites,
+        obstaculos.chao.spriteX, obstaculos.chao.spriteY,
+        obstaculos.largura, obstaculos.altura,
+        obstaculos.canos2X, obstaculos.canoChaoY,
+        obstaculos.largura, obstaculos.altura
+      );
+      
+      // cano do céu
+      contexto.drawImage(
+        sprites,
+        obstaculos.ceu.spriteX, obstaculos.ceu.spriteY,
+        obstaculos.largura, obstaculos.altura,
+        obstaculos.canos2X, obstaculos.canoCeuY,
+        obstaculos.largura, obstaculos.altura
+      );
+
+
+
+      // obstáculo 3
+      // cano do chao
+      contexto.drawImage(
+        sprites,
+        obstaculos.chao.spriteX, obstaculos.chao.spriteY,
+        obstaculos.largura, obstaculos.altura,
+        obstaculos.canos3X, obstaculos.canoChaoY,
+        obstaculos.largura, obstaculos.altura
+      );
+      
+      // cano do céu
+      contexto.drawImage(
+        sprites,
+        obstaculos.ceu.spriteX, obstaculos.ceu.spriteY,
+        obstaculos.largura, obstaculos.altura,
+        obstaculos.canos3X, obstaculos.canoCeuY,
+        obstaculos.largura, obstaculos.altura
+      );
+    }
+  }
+  return obstaculos;
+}
 // plano de fundo
 const planoDeFundo = {
   spriteX: 390,
@@ -209,7 +319,6 @@ function criarFlappyBird() {
 
       const intervaloDeFrames = 10;
       const passouOIntervalo = frames % intervaloDeFrames === 0;
-      console.log('[passouOIntervalo]', passouOIntervalo);
 
       if(passouOIntervalo) {
         const baseDoIncremento = 1;
@@ -292,9 +401,13 @@ const Telas = {
   },
 
   JOGO: {
+    inicializa() {
+      globais.obstaculos = criarObstaculos();
+    },
     desenha() {
       planoDeFundo.desenha();
       globais.chao.desenha();
+      globais.obstaculos.desenha();
       globais.flappyBird.desenha();
     },
     click() {
@@ -303,6 +416,7 @@ const Telas = {
     atualiza() {
       globais.flappyBird.atualiza();
       globais.chao.atualiza();
+      globais.obstaculos.atualiza();
     }
   }
 }
