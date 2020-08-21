@@ -21,116 +21,6 @@ som_HIT.src = './efeitos/hit.wav';
 const canvas = document.querySelector('canvas');
 const contexto = canvas.getContext('2d');
 
-function criarObstaculos() {
-  const obstaculos = {
-    chao: {
-      spriteX: 0,
-      spriteY: 169,
-    },
-    ceu: {
-      spriteX: 0 + 52,
-      spriteY: 169,
-    },
-
-    largura: 52,
-    altura: 400,
-    espacamentoEntreCanos: 100,
-    espacoEntreObstaculos: 175,
-
-    canoChaoY: 300,
-    canoCeuY: 300 - 400 - 100,
-    canos1X: 350,
-    canos2X: 350 + 175,
-    canos3X: 350 + (175 * 2),
-  
-    atualiza() {
-      const movimento = 1;
-
-      obstaculos.canos1X -= movimento;
-      obstaculos.canos2X -= movimento;
-      obstaculos.canos3X -= movimento;
-    },
-  
-    desenha() {
-
-      if(obstaculos.canos1X <= -obstaculos.largura) {
-        console.log('Entrou no 1');
-        obstaculos.canos1X = (obstaculos.espacoEntreObstaculos * 3) + (obstaculos.largura * 2);
-
-      } else if(obstaculos.canos2X <= -obstaculos.largura) {
-        console.log('Entrou no 2');
-        obstaculos.canos2X = (obstaculos.espacoEntreObstaculos * 3) + (obstaculos.largura * 2);
-
-      } else if(obstaculos.canos3X <= -obstaculos.largura) {
-        console.log('Entrou no 3');
-        obstaculos.canos3X = (obstaculos.espacoEntreObstaculos * 3) + (obstaculos.largura * 2);
-
-      }
-
-      // obstáculo 1
-      // cano do chao
-      contexto.drawImage(
-        sprites,
-        obstaculos.chao.spriteX, obstaculos.chao.spriteY,
-        obstaculos.largura, obstaculos.altura,
-        obstaculos.canos1X, obstaculos.canoChaoY,
-        obstaculos.largura, obstaculos.altura
-      );
-
-      // cano do céu
-      contexto.drawImage(
-        sprites,
-        obstaculos.ceu.spriteX, obstaculos.ceu.spriteY,
-        obstaculos.largura, obstaculos.altura,
-        obstaculos.canos1X, obstaculos.canoCeuY,
-        obstaculos.largura, obstaculos.altura
-      );
-
-
-
-      // obstáculo 2
-      // cano do chao
-      contexto.drawImage(
-        sprites,
-        obstaculos.chao.spriteX, obstaculos.chao.spriteY,
-        obstaculos.largura, obstaculos.altura,
-        obstaculos.canos2X, obstaculos.canoChaoY,
-        obstaculos.largura, obstaculos.altura
-      );
-      
-      // cano do céu
-      contexto.drawImage(
-        sprites,
-        obstaculos.ceu.spriteX, obstaculos.ceu.spriteY,
-        obstaculos.largura, obstaculos.altura,
-        obstaculos.canos2X, obstaculos.canoCeuY,
-        obstaculos.largura, obstaculos.altura
-      );
-
-
-
-      // obstáculo 3
-      // cano do chao
-      contexto.drawImage(
-        sprites,
-        obstaculos.chao.spriteX, obstaculos.chao.spriteY,
-        obstaculos.largura, obstaculos.altura,
-        obstaculos.canos3X, obstaculos.canoChaoY,
-        obstaculos.largura, obstaculos.altura
-      );
-      
-      // cano do céu
-      contexto.drawImage(
-        sprites,
-        obstaculos.ceu.spriteX, obstaculos.ceu.spriteY,
-        obstaculos.largura, obstaculos.altura,
-        obstaculos.canos3X, obstaculos.canoCeuY,
-        obstaculos.largura, obstaculos.altura
-      );
-    }
-  }
-  return obstaculos;
-}
 // plano de fundo
 const planoDeFundo = {
   spriteX: 390,
@@ -362,6 +252,111 @@ function criarFlappyBird() {
   return flappyBird;
 }
 
+function criarObstaculos() {
+  const obstaculos = {
+    chao: {
+      spriteX: 0,
+      spriteY: 169,
+    },
+    ceu: {
+      spriteX: 52,
+      spriteY: 169,
+    },
+
+    largura: 52,
+    altura: 400,
+    espaco: 80,
+  
+    desenha() {
+      
+
+      obstaculos.pares.forEach(function(par) {
+        
+        const yRandom = par.y; 
+        const espacamentoEntreCanos = 90;
+
+        // obstáculo 1
+        // cano do céu
+        const canoCeuX = par.x;
+        const canoCeuY = yRandom;
+        contexto.drawImage(
+          sprites,
+          obstaculos.ceu.spriteX, obstaculos.ceu.spriteY,
+          obstaculos.largura, obstaculos.altura,
+          canoCeuX, canoCeuY,
+          obstaculos.largura, obstaculos.altura
+        );
+        
+        // cano do chao
+        const canoChaoX = par.x;
+        const canoChaoY = obstaculos.altura + espacamentoEntreCanos + yRandom;
+        contexto.drawImage(
+          sprites,
+          obstaculos.chao.spriteX, obstaculos.chao.spriteY,
+          obstaculos.largura, obstaculos.altura,
+          canoChaoX, canoChaoY,
+          obstaculos.largura, obstaculos.altura
+        );
+
+        par.canoCeu = {
+          x: canoCeuX,
+          y: obstaculos.altura + canoCeuY
+        };
+        par.canoChao = {
+          x: canoChaoX,
+          y: canoChaoY
+        };
+
+      });
+    },
+
+    pares: [],
+
+    temColisaoComOFlappyBird(par) {
+      const cabecaDoFlappy = globais.flappyBird.y;
+      const peDoFlappy = globais.flappyBird.y + globais.flappyBird.altura;
+
+      if(globais.flappyBird.x >= par.x) {
+        if(cabecaDoFlappy <= par.canoCeu.y) {
+          return true;
+        }
+
+        if(peDoFlappy >= par.canoChao.y) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    atualiza() {
+      const passou100Frames = frames % 100 === 0;
+      if(passou100Frames) {
+        
+        obstaculos.pares.push(
+          {
+            x: canvas.width,
+            y: -150 * (Math.random() + 1)
+          }
+        );
+      }
+
+      obstaculos.pares.forEach(function(par) {
+        par.x = par.x - 2;
+
+        if(obstaculos.temColisaoComOFlappyBird(par)) {
+          console.log('Você perdeu');
+          mudarParaTela(Telas.INICIO);
+        }
+
+        if(par.x <= -obstaculos.largura) {
+          obstaculos.pares.shift();
+        }
+      });
+    }
+  }
+  return obstaculos;
+}
+
 function fazColisao(flappyBird, chao) {
   const flappyBirdY = flappyBird.y + flappyBird.altura;
   const chaoY = chao.y;
@@ -406,8 +401,8 @@ const Telas = {
     },
     desenha() {
       planoDeFundo.desenha();
-      globais.chao.desenha();
       globais.obstaculos.desenha();
+      globais.chao.desenha();
       globais.flappyBird.desenha();
     },
     click() {
